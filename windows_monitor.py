@@ -90,14 +90,14 @@ def scan_folders(paths):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="Digital Archaeologist folder monitor")
+    parser = argparse.ArgumentParser(description="File History Updates folder monitor")
     parser.add_argument("--scan", action="store_true", help="Scan without opening the menu")
     parser.add_argument("--folder", type=Path, action="append", help="Scan a specific folder")
     args = parser.parse_args()
     if args.scan or args.folder:
         return scan_folders(args.folder)
 
-    print("Digital Archaeologist Folder Monitor")
+    print("File History Updates Folder Monitor")
     print("1. Scan Downloads, Documents, Pictures, Videos, Music, and Desktop")
     print("2. Enable scanning at Windows sign-in")
     print("3. Disable scanning at Windows sign-in")

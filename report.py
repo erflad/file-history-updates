@@ -75,7 +75,7 @@ def generate_report(findings, output_path):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Digital Archaeologist Report</title>
+<title>File History Updates Report</title>
 
 <style>
     body {{
@@ -163,7 +163,7 @@ def generate_report(findings, output_path):
 
 <body>
     <header>
-        <h1>Digital Archaeologist</h1>
+        <h1>File History Updates</h1>
         <p class="subtitle">
             Actionable information discovered in your documents.
         </p>

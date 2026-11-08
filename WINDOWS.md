@@ -1,9 +1,15 @@
-# Digital Archaeologist for Windows
+# File History Updates for Windows
 
-Download `DigitalArchaeologist.exe` from this repository's Releases page and place it somewhere you plan to keep it. Double-click it to open the menu. Choose **1** to scan Downloads, Documents, Pictures, Videos, Music, and Desktop. Choose **2** to run automatically at Windows sign-in, or **3** to disable automatic runs. If you move the executable, use option 2 from its new location to update the sign-in entry.
+Download `FileHistoryUpdates.exe` from the repository's **Releases** tab. Save it where you plan to keep it, then double-click it. The Windows x64 executable includes the folder monitor and runs without a separate Python installation.
 
-The executable is a standalone Windows x64 build. It runs the folder monitor. The project's document analysis still runs separately through `main.py`.
+1. **Scan now** checks Downloads, Documents, Pictures, Videos, Music, and Desktop.
+2. **Enable scanning at Windows sign-in** starts a scan each time you sign in. If you move or rename the executable, run this option again from its new location.
+3. **Disable scanning at Windows sign-in** removes the automatic run.
 
-The first successful scan of each folder establishes its baseline. Later scans report added, modified, and deleted files. A folder with an incomplete scan keeps its previous baseline. The database and scan log are local to your Windows account under `%LOCALAPPDATA%\DigitalArchaeologist`.
+The first successful scan sets a baseline for each folder. Later scans report added, modified, and deleted files. An incomplete scan keeps that folder's last complete baseline.
 
-For maintainers, push the source files and the workflow to GitHub. To test packaging, run **Build Windows executable** from the repository's Actions tab and download its artifact. To publish, push a version tag such as `v0.1.0` from the commit containing the workflow. A tagged build publishes the executable to Releases after the smoke test succeeds.
+The app continues to use `%LOCALAPPDATA%\DigitalArchaeologist` so upgrades can pick up the existing database and log. Open `folder-monitor.log` in that folder to review unattended scans. Document analysis is available through the source project.
+
+## Build and publish
+
+Run **Build Windows executable** from the repository's **Actions** tab. Download the `FileHistoryUpdates-windows-x64` artifact, extract it, and test the executable. To publish, push a new version tag from the commit containing the workflow. The tagged build runs a smoke test before attaching the executable to a GitHub release.

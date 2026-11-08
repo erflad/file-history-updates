@@ -21,7 +21,7 @@ jobs:
       - name: Install packager
         run: python -m pip install pyinstaller==6.22.3
       - name: Build executable
-        run: python -m PyInstaller --clean --noconfirm --onefile --name DigitalArchaeologist windows_monitor.py
+        run: python -m PyInstaller --clean --noconfirm --onefile --name FileHistoryUpdates windows_monitor.py
       - name: Verify persistence across executable runs
         shell: pwsh
         run: |
@@ -29,7 +29,7 @@ jobs:
           $env:LOCALAPPDATA = Join-Path $env:RUNNER_TEMP 'da-state'
           $folder = Join-Path $env:RUNNER_TEMP 'da-fixture'
           New-Item -ItemType Directory -Path $folder | Out-Null
-          $exe = '.\dist\DigitalArchaeologist.exe'
+          $exe = '.\dist\FileHistoryUpdates.exe'
           $output = & $exe --folder $folder
           if ($LASTEXITCODE -ne 0 -or $output -notcontains 'Establishing initial baseline.') {
             throw "Initial scan failed: $output"
@@ -41,8 +41,8 @@ jobs:
           }
       - uses: actions/upload-artifact@v4
         with:
-          name: DigitalArchaeologist-windows-x64
-          path: dist/DigitalArchaeologist.exe
+          name: FileHistoryUpdates-windows-x64
+          path: dist/FileHistoryUpdates.exe
           if-no-files-found: error
 
   release:
@@ -54,9 +54,9 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: DigitalArchaeologist-windows-x64
+          name: FileHistoryUpdates-windows-x64
       - name: Publish GitHub release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" DigitalArchaeologist.exe --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes
+        run: gh release create "$RELEASE_TAG" FileHistoryUpdates.exe --repo "$GITHUB_REPOSITORY" --verify-tag --generate-notes

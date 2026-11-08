@@ -1,103 +1,41 @@
-# Digital Archaeologist
+# File History Updates
 
-A local-first Python automation tool that searches documents for potentially forgotten deadlines, reminders, registrations, and follow-ups.
+Track added, modified, and deleted files on your Windows PC. File History Updates compares each scan with the last complete inventory and keeps the results on your device.
 
-Instead of manually revisiting old files, Digital Archaeologist extracts actionable information, assigns explainable priority scores, and generates an HTML report.
+## Windows download
 
-## Features
+Download `FileHistoryUpdates.exe` from the repository's **Releases** tab and double-click it. The menu lets you scan Downloads, Documents, Pictures, Videos, Music, and Desktop, or enable scans at Windows sign-in. See [the Windows guide](WINDOWS.md) for setup and release instructions.
 
-- **Document scanning:** Recursively searches selected folders for TXT, Markdown, and PDF files.
-- **Text extraction:** Extracts readable text from supported documents.
-- **Action detection:** Uses regular expressions to identify deadlines, reminders, follow-ups, and registration dates.
-- **Date extraction:** Identifies explicit calendar dates and associates them with detected actions.
-- **Priority ranking:** Scores findings based on action type, date proximity, and document age.
-- **Incremental scanning:** Uses SHA-256 fingerprints to detect unchanged files and avoid unnecessary processing.
-- **Persistent storage:** Uses SQLite to retain scan history, file fingerprints, and previously detected findings.
-- **HTML reporting:** Generates a readable report with priority explanations and category summaries.
-- **Automated testing:** Uses pytest to verify extraction, detection, ranking, database, and report functionality.
+The first successful scan of each folder sets its baseline. An incomplete scan keeps that folder's previous baseline so unreadable files don't show up as deletions.
 
-## Technologies
+## Run from source
 
-- Python
-- SQLite
-- Regular expressions
-- SHA-256 hashing
-- HTML/CSS
-- pytest
-- pypdf
-- python-dateutil
+From the project folder in PowerShell, create a virtual environment and install the document-analysis and test dependencies.
 
-## Setup
-
-Clone the repository:
-
-```bash
-git clone YOUR_REPOSITORY_URL
-cd DigitalArchaeologist
-```
-
-Create and activate a virtual environment:
-
-**Windows PowerShell**
 ```powershell
 python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+.\.venv\Scripts\python.exe -m pip install pypdf python-dateutil pytest
 ```
 
-Install dependencies:
+Scan the six Windows folders, or compare a single folder by supplying its path.
 
 ```powershell
-python -m pip install pypdf python-dateutil pytest
+.\.venv\Scripts\python.exe windows_monitor.py --scan
+.\.venv\Scripts\python.exe monitor.py "$env:USERPROFILE\Downloads"
 ```
 
-## Usage
+## Document analysis
 
-Place documents you want to scan inside `sample_documents/`.
-
-Run the application:
+Place TXT, Markdown, or text-based PDF files in `sample_documents` and run:
 
 ```powershell
-python main.py
+.\.venv\Scripts\python.exe main.py
 ```
 
-Open the generated report:
+The analyzer extracts possible deadlines, reminders, follow-ups, and registrations, ranks them, and writes `reports/latest_report.html`. It reuses findings from unchanged files. Image-only PDFs require OCR, and relative dates such as “next Friday” are currently unsupported.
+
+## Tests
 
 ```powershell
-Invoke-Item .\reports\latest_report.html
+.\.venv\Scripts\python.exe -m pytest -q
 ```
-
-Run automated tests:
-
-```powershell
-python -m pytest -v
-```
-
-## How It Works
-
-1. The scanner locates supported documents.
-2. SHA-256 hashing determines whether each file has changed since its last successful scan.
-3. New or modified documents are processed and their text is extracted.
-4. Regular expressions identify potentially actionable phrases.
-5. Explicit dates are associated with detected actions.
-6. A scoring system assigns priority levels and explains its reasoning.
-7. Findings, scan history, and file fingerprints are saved in SQLite.
-8. The application generates an HTML report using both newly detected and previously stored findings.
-
-## Privacy
-
-Document processing is performed locally. Document contents are not sent to an external API. The SQLite database and generated reports remain on the local machine.
-
-## Limitations
-
-- Scanned PDFs containing images require OCR, which is not currently implemented.
-- Detection is rule-based and may produce false positives or miss some phrasing.
-- Relative dates such as "next Friday" are not currently resolved.
-- Priority scores are heuristic estimates and should be reviewed rather than treated as definitive reminders.
-
-## Future Improvements
-
-- Configurable scan directories and excluded folders.
-- Support for additional document formats.
-- Improved natural-language date interpretation.
-- Background or scheduled scanning.
-- More advanced report filtering and search.

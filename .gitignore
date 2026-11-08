@@ -7,3 +7,9 @@ history.db
 history.db-journal
 
 reports/*.html
+# SQLite sidecars and local build output
+history.db-wal
+history.db-shm
+/build/
+/dist/
+/FileHistoryUpdates.spec
