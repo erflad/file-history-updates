@@ -1,11 +1,13 @@
 import json
 import sqlite3
 import hashlib
+from contextlib import closing
 from pathlib import Path
 from datetime import datetime
 
 
 DATABASE_PATH = Path(__file__).parent / "history.db"
+_ANY_INVENTORY = object()
 
 
 def initialize_database():
@@ -36,6 +38,72 @@ def initialize_database():
                 finding_data TEXT NOT NULL
             )
         """)
+
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS folder_baselines (
+                folder_path TEXT PRIMARY KEY
+            )
+        """)
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS folder_inventory (
+                folder_path TEXT NOT NULL,
+                file_path TEXT NOT NULL,
+                file_data TEXT NOT NULL,
+                PRIMARY KEY (folder_path, file_path)
+            )
+        """)
+        connection.execute("""
+            INSERT OR IGNORE INTO folder_baselines (folder_path)
+            SELECT DISTINCT folder_path FROM folder_inventory
+        """)
+
+
+def _folder_key(folder_path):
+    return str(Path(folder_path).expanduser().resolve())
+
+
+def _read_inventory(connection, folder_key):
+    rows = connection.execute("""
+        SELECT inventory.file_path, inventory.file_data
+        FROM folder_baselines AS baseline
+        LEFT JOIN folder_inventory AS inventory USING (folder_path)
+        WHERE baseline.folder_path = ?
+    """, (folder_key,)).fetchall()
+    if not rows:
+        return None
+    return {path: json.loads(data) for path, data in rows if path is not None}
+
+
+def get_folder_inventory(folder_path):
+    """Return the saved snapshot, or None if no baseline exists."""
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection:
+        return _read_inventory(connection, _folder_key(folder_path))
+
+
+def save_folder_inventory(folder_path, inventory, *, expected=_ANY_INVENTORY):
+    """Replace a complete snapshot, unless its expected baseline has changed."""
+    folder_key = _folder_key(folder_path)
+    rows = [(folder_key, path, json.dumps(data)) for path, data in inventory.items()]
+
+    with closing(sqlite3.connect(DATABASE_PATH)) as connection, connection:
+        connection.execute("BEGIN IMMEDIATE")
+        if (
+            expected is not _ANY_INVENTORY
+            and _read_inventory(connection, folder_key) != expected
+        ):
+            return False
+        connection.execute(
+            "INSERT OR IGNORE INTO folder_baselines (folder_path) VALUES (?)",
+            (folder_key,),
+        )
+        connection.execute(
+            "DELETE FROM folder_inventory WHERE folder_path = ?", (folder_key,)
+        )
+        connection.executemany("""
+            INSERT INTO folder_inventory (folder_path, file_path, file_data)
+            VALUES (?, ?, ?)
+        """, rows)
+    return True
 
 
 def calculate_file_hash(file_path):
